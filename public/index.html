@@ -273,6 +273,27 @@ footer{text-align:center;padding:40px 0 16px;color:var(--muted);font-size:11px;l
   .infobox-grid{grid-template-columns:1fr}
 }
 
+
+/* ── Intel Form ── */
+.intel-form-wrapper{max-width:700px;margin:36px auto 0}
+.intel-form-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px 28px 24px}
+.intel-form-title{font-family:var(--font-display);font-size:18px;font-weight:800;margin-bottom:6px}
+.intel-form-subtitle{font-size:12px;color:var(--muted);margin-bottom:22px;letter-spacing:.04em}
+.intel-fields{display:flex;flex-direction:column;gap:14px}
+.intel-field-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.intel-field{display:flex;flex-direction:column;gap:6px}
+.intel-label{font-size:11px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;display:flex;align-items:center;gap:6px}
+.intel-optional{font-size:10px;color:var(--border);text-transform:none;letter-spacing:0;font-style:italic}
+.intel-input-field{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:11px 14px;color:var(--text);font-family:var(--font-mono);font-size:13px;outline:none;transition:border-color .15s,box-shadow .15s;width:100%}
+.intel-input-field::placeholder{color:var(--muted)}
+.intel-input-field:focus{border-color:rgba(255,184,0,.5);box-shadow:0 0 12px rgba(255,184,0,.15)}
+.intel-query-preview{font-size:11px;color:var(--muted);margin-top:14px;min-height:16px;letter-spacing:.04em;font-style:italic}
+.intel-query-preview span{color:var(--amber)}
+.intel-form-actions{display:flex;justify-content:space-between;align-items:center;margin-top:20px;gap:12px}
+.intel-clear-btn{background:none;border:1px solid var(--border);color:var(--muted);font-family:var(--font-mono);font-size:11px;padding:10px 16px;border-radius:8px;cursor:pointer;transition:all .15s}
+.intel-clear-btn:hover{border-color:var(--accent3);color:var(--accent3)}
+@media(max-width:600px){.intel-field-row{grid-template-columns:1fr}.intel-form-card{padding:20px 16px}}
+
 /* ── PDF print styles ── */
 @media print{
   body{background:#fff!important;color:#000!important}
@@ -369,12 +390,54 @@ footer{text-align:center;padding:40px 0 16px;color:var(--muted);font-size:11px;l
        TAB 2: INTERNET INTEL
   ══════════════════════════════════════════════════ -->
   <div class="panel" id="tab-intel">
-    <div class="search-wrapper">
-      <div class="intel-search-box">
-        <span class="amber-icon">🌐</span>
-        <input type="text" id="intel-input" placeholder="name, address, email, phone, topic, anything…" autocomplete="off" spellcheck="false"/>
-        <div class="search-actions">
-          <button class="btn-primary btn-amber" id="intel-btn">Search →</button>
+    <div class="intel-form-wrapper">
+      <div class="intel-form-card">
+        <div class="intel-form-title">🌐 Public Records Search</div>
+        <div class="intel-form-subtitle">All fields are optional — fill in what you know</div>
+        <div class="intel-fields">
+          <div class="intel-field-row">
+            <div class="intel-field">
+              <label class="intel-label">First Name</label>
+              <input type="text" id="intel-firstname" class="intel-input-field" placeholder="e.g. John" autocomplete="off" spellcheck="false"/>
+            </div>
+            <div class="intel-field">
+              <label class="intel-label">Last Name</label>
+              <input type="text" id="intel-lastname" class="intel-input-field" placeholder="e.g. Smith" autocomplete="off" spellcheck="false"/>
+            </div>
+          </div>
+          <div class="intel-field-row">
+            <div class="intel-field">
+              <label class="intel-label">Phone Number <span class="intel-optional">optional</span></label>
+              <input type="text" id="intel-phone" class="intel-input-field" placeholder="e.g. +1 555 000 1234" autocomplete="off" spellcheck="false"/>
+            </div>
+            <div class="intel-field">
+              <label class="intel-label">Email Address <span class="intel-optional">optional</span></label>
+              <input type="text" id="intel-email" class="intel-input-field" placeholder="e.g. john@email.com" autocomplete="off" spellcheck="false"/>
+            </div>
+          </div>
+          <div class="intel-field">
+            <label class="intel-label">Street Address <span class="intel-optional">optional</span></label>
+            <input type="text" id="intel-address" class="intel-input-field" placeholder="e.g. 123 Main St" autocomplete="off" spellcheck="false"/>
+          </div>
+          <div class="intel-field-row">
+            <div class="intel-field">
+              <label class="intel-label">City <span class="intel-optional">optional</span></label>
+              <input type="text" id="intel-city" class="intel-input-field" placeholder="e.g. Chicago" autocomplete="off" spellcheck="false"/>
+            </div>
+            <div class="intel-field">
+              <label class="intel-label">Country <span class="intel-optional">optional</span></label>
+              <input type="text" id="intel-country" class="intel-input-field" placeholder="e.g. USA" autocomplete="off" spellcheck="false"/>
+            </div>
+          </div>
+          <div class="intel-field">
+            <label class="intel-label">Extra Keywords <span class="intel-optional">optional — company, username, topic…</span></label>
+            <input type="text" id="intel-keywords" class="intel-input-field" placeholder="e.g. software engineer, Tesla, Twitter handle…" autocomplete="off" spellcheck="false"/>
+          </div>
+        </div>
+        <div class="intel-query-preview" id="intel-query-preview"></div>
+        <div class="intel-form-actions">
+          <button class="intel-clear-btn" id="intel-clear-btn">✕ Clear All</button>
+          <button class="btn-primary btn-amber" id="intel-btn">🔍 Search →</button>
         </div>
       </div>
     </div>
@@ -690,15 +753,48 @@ function exportProfilePDF(platform, username){
 }
 
 // ── Internet Intel Search ──────────────────────────────────────────────────────
+// ── Intel form fields ─────────────────────────────────────────────────────────
+const INTEL_FIELDS = ['intel-firstname','intel-lastname','intel-phone','intel-email','intel-address','intel-city','intel-country','intel-keywords'];
+
+function buildIntelQuery(){
+  const fn = document.getElementById('intel-firstname').value.trim();
+  const ln = document.getElementById('intel-lastname').value.trim();
+  const phone = document.getElementById('intel-phone').value.trim();
+  const email = document.getElementById('intel-email').value.trim();
+  const address = document.getElementById('intel-address').value.trim();
+  const city = document.getElementById('intel-city').value.trim();
+  const country = document.getElementById('intel-country').value.trim();
+  const keywords = document.getElementById('intel-keywords').value.trim();
+  const parts = [fn&&ln ? fn+' '+ln : (fn||ln), phone, email, address, city, country, keywords].filter(Boolean);
+  return parts.join(' ');
+}
+
+function updateQueryPreview(){
+  const q = buildIntelQuery();
+  const el = document.getElementById('intel-query-preview');
+  el.innerHTML = q ? `Will search for: <span>${esc(q)}</span>` : '';
+}
+
+INTEL_FIELDS.forEach(id => {
+  document.getElementById(id).addEventListener('input', updateQueryPreview);
+  document.getElementById(id).addEventListener('keydown', e=>{ if(e.key==='Enter') startIntelSearch(); });
+});
+
+document.getElementById('intel-clear-btn').addEventListener('click', ()=>{
+  INTEL_FIELDS.forEach(id => document.getElementById(id).value='');
+  document.getElementById('intel-query-preview').innerHTML='';
+  document.getElementById('intel-results').innerHTML='';
+  document.getElementById('intel-pdf-bar').classList.remove('visible');
+});
+
 document.getElementById('intel-btn').addEventListener('click', startIntelSearch);
-document.getElementById('intel-input').addEventListener('keydown', e=>{ if(e.key==='Enter') startIntelSearch(); });
 
 const LOADING_MSGS=['Querying DuckDuckGo…','Searching Wikipedia…','Checking location databases…','Looking up Wikidata…','Scanning public records…','Cross-referencing sources…'];
 let loadingMsgInterval=null;
 
 function startIntelSearch(){
-  const q=document.getElementById('intel-input').value.trim();
-  if(!q) return;
+  const q = buildIntelQuery();
+  if(!q){ alert('Please fill in at least one field.'); return; }
 
   document.getElementById('intel-results').innerHTML='';
   document.getElementById('intel-pdf-bar').classList.remove('visible');
@@ -719,7 +815,7 @@ function startIntelSearch(){
     .finally(()=>{
       clearInterval(loadingMsgInterval);
       document.getElementById('intel-loading').style.display='none';
-      btn.disabled=false; btn.textContent='Search →';
+      btn.disabled=false; btn.textContent='🔍 Search →';
     });
 }
 
@@ -820,7 +916,7 @@ function renderIntelError(err){
 
 // ── Intel PDF Export ───────────────────────────────────────────────────────────
 document.getElementById('intel-pdf-btn').addEventListener('click', ()=>{
-  const q=document.getElementById('intel-input').value.trim();
+  const q=buildIntelQuery();
   const title=document.title;
   document.title=`Intel_Report_${q.replace(/\s+/g,'_')}_TraceUser`;
   window.print();
