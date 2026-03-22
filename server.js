@@ -226,12 +226,20 @@ async function checkSite(site, username) {
 
 // ── SSE endpoint ──────────────────────────────────────────────────────────────
 app.get("/api/search", async (req, res) => {
-  const { username } = req.query;
+  const { username, sites: sitesParam } = req.query;
   if (!username || username.trim().length < 1) {
     return res.status(400).json({ error: "Username required" });
   }
 
   const clean = username.trim().toLowerCase().replace(/[^a-z0-9._-]/g, "");
+
+  // Filter sites if a selection was passed
+  let targets = SITES;
+  if (sitesParam && sitesParam.trim().length > 0) {
+    const selected = new Set(sitesParam.split(",").map((s) => s.trim()));
+    targets = SITES.filter((s) => selected.has(s.name));
+    if (targets.length === 0) targets = SITES; // fallback to all
+  }
 
   res.setHeader("Content-Type", "text/event-stream");
   res.setHeader("Cache-Control", "no-cache");
@@ -243,30 +251,33 @@ app.get("/api/search", async (req, res) => {
     res.write(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`);
   };
 
-  send("start", { total: SITES.length, username: clean });
+  send("start", { total: targets.length, username: clean });
 
-  // Process in concurrent batches of 15
   const CONCURRENCY = 15;
   let completed = 0;
 
-  for (let i = 0; i < SITES.length; i += CONCURRENCY) {
-    const batch = SITES.slice(i, i + CONCURRENCY);
+  for (let i = 0; i < targets.length; i += CONCURRENCY) {
+    const batch = targets.slice(i, i + CONCURRENCY);
     const results = await Promise.all(batch.map((s) => checkSite(s, clean)));
 
     for (const r of results) {
       completed++;
-      send("result", { ...r, completed, total: SITES.length });
+      send("result", { ...r, completed, total: targets.length });
     }
 
     if (res.writableEnded) break;
   }
 
-  send("done", { total: SITES.length, username: clean });
+  send("done", { total: targets.length, username: clean });
   res.end();
 });
 
 app.get("/api/sites", (req, res) => {
-  res.json({ count: SITES.length, categories: [...new Set(SITES.map((s) => s.cat))] });
+  res.json({
+    count: SITES.length,
+    categories: [...new Set(SITES.map((s) => s.cat))],
+    sites: SITES.map((s) => ({ name: s.name, cat: s.cat, url: s.url })),
+  });
 });
 
 app.listen(PORT, () => {
